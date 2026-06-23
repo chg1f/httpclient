@@ -24,7 +24,7 @@ func init() {
 	Default = NewClient(cfg)
 }
 
-// Config controls how a Client is created.
+// Config controls how an HTTP client is created.
 type Config struct {
 	// Timeout limits the total duration of a request, including redirects and body reads.
 	Timeout time.Duration `json:"timeout" yaml:"timeout" mapstructure:"timeout"`

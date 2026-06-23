@@ -35,29 +35,26 @@ cfg.Transport.ForceAttemptHttp2 = true
 cfg.Transport.MaxIdleConns = 100
 cfg.Transport.MaxIdleConnsPerHost = 10
 
-client, err := httpclient.NewClient(cfg)
-if err != nil {
-	return err
-}
+client := httpclient.NewClient(cfg)
 ```
 
 `Config` fields include `json`, `yaml`, and `mapstructure` tags so the same
 structure can be populated by common configuration loaders.
 
-## Transport Hooks
+## Transport Options
 
-The `transport` package wraps `http.RoundTripper` implementations with small,
-composable hooks:
+`httpclient` wraps `http.RoundTripper` implementations with small, composable
+options:
 
 ```go
-client.Transport = transport.New(
+client.Transport = httpclient.New(
 	http.DefaultTransport,
-	transport.Timeout(5*time.Second),
-	transport.Ratelimit(time.Second, 100),
+	httpclient.Timeout(5*time.Second),
+	httpclient.Ratelimit(time.Second, 100),
 )
 ```
 
-Available hooks:
+`New` applies options in the supplied order. Available options:
 
 - `Timeout` applies a timeout at the transport layer.
 - `DownstreamBandwidth` limits response body read bandwidth.
