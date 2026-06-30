@@ -1,6 +1,8 @@
 package httpclient
 
-import "net/http"
+import (
+	"net/http"
+)
 
 // RoundTripper adapts a function to the http.RoundTripper interface.
 type RoundTripper func(*http.Request) (*http.Response, error)

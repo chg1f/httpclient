@@ -23,9 +23,8 @@ func Timeout(ttl time.Duration) Transport {
 	}
 }
 
-// DownstreamBandwidth limits response body read bandwidth to size bytes per second.
-func DownstreamBandwidth(size uint64) Transport {
-	limiter := rate.NewLimiter(rate.Limit(size), int(size))
+// DownstreamBandwidth limits response body read bandwidth with limiter.
+func DownstreamBandwidth(limiter *rate.Limiter) Transport {
 	return func(next http.RoundTripper) http.RoundTripper {
 		return RoundTripper(func(req *http.Request) (*http.Response, error) {
 			resp, err := next.RoundTrip(req)
@@ -52,9 +51,8 @@ func DownstreamBandwidth(size uint64) Transport {
 	}
 }
 
-// UpstreamBandwidth limits request body read bandwidth to size bytes per second.
-func UpstreamBandwidth(size uint64) Transport {
-	limiter := rate.NewLimiter(rate.Limit(size), int(size))
+// UpstreamBandwidth limits request body read bandwidth with limiter.
+func UpstreamBandwidth(limiter *rate.Limiter) Transport {
 	return func(next http.RoundTripper) http.RoundTripper {
 		return RoundTripper(func(req *http.Request) (*http.Response, error) {
 			if req.Body != nil {
@@ -80,9 +78,8 @@ func UpstreamBandwidth(size uint64) Transport {
 	}
 }
 
-// Ratelimit limits request throughput with period and limit.
-func Ratelimit(period time.Duration, limit int) Transport {
-	limiter := rate.NewLimiter(rate.Every(period), limit)
+// Ratelimit limits request throughput with limiter.
+func Ratelimit(limiter *rate.Limiter) Transport {
 	return func(next http.RoundTripper) http.RoundTripper {
 		return RoundTripper(func(req *http.Request) (*http.Response, error) {
 			if err := limiter.Wait(req.Context()); err != nil {

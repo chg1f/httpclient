@@ -47,16 +47,18 @@ structure can be populated by common configuration loaders.
 options:
 
 ```go
+limiter := rate.NewLimiter(rate.Every(time.Second), 100)
+
 client.Transport = httpclient.New(
 	http.DefaultTransport,
 	httpclient.Timeout(5*time.Second),
-	httpclient.Ratelimit(time.Second, 100),
+	httpclient.Ratelimit(limiter),
 )
 ```
 
 `New` applies options in the supplied order. Available options:
 
 - `Timeout` applies a timeout at the transport layer.
-- `DownstreamBandwidth` limits response body read bandwidth.
-- `UpstreamBandwidth` limits request body read bandwidth.
-- `Ratelimit` limits request throughput over a period.
+- `DownstreamBandwidth` limits response body read bandwidth with a limiter.
+- `UpstreamBandwidth` limits request body read bandwidth with a limiter.
+- `Ratelimit` limits request throughput with a limiter.

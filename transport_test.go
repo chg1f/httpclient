@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"strings"
 	"testing"
+
+	"golang.org/x/time/rate"
 )
 
 func TestDownstreamBandwidthReadsWrappedResponseBody(t *testing.T) {
@@ -15,7 +17,8 @@ func TestDownstreamBandwidthReadsWrappedResponseBody(t *testing.T) {
 		}, nil
 	})
 
-	resp, err := DownstreamBandwidth(1024)(next).RoundTrip(&http.Request{})
+	limiter := rate.NewLimiter(rate.Limit(1024), 1024)
+	resp, err := DownstreamBandwidth(limiter)(next).RoundTrip(&http.Request{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -47,7 +50,8 @@ func TestUpstreamBandwidthReadsWrappedRequestBody(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	_, err = UpstreamBandwidth(1024)(next).RoundTrip(req)
+	limiter := rate.NewLimiter(rate.Limit(1024), 1024)
+	_, err = UpstreamBandwidth(limiter)(next).RoundTrip(req)
 	if err != nil {
 		t.Fatal(err)
 	}
