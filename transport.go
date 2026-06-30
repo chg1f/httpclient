@@ -30,9 +30,10 @@ func DownstreamBandwidth(size uint64) Transport {
 		return RoundTripper(func(req *http.Request) (*http.Response, error) {
 			resp, err := next.RoundTrip(req)
 			if resp != nil && resp.Body != nil {
+				body := resp.Body
 				resp.Body = ReadCloser{
 					Reader: Reader(func(bs []byte) (int, error) {
-						n, err := resp.Body.Read(bs)
+						n, err := body.Read(bs)
 						if n > 0 {
 							err = limiter.WaitN(req.Context(), n)
 							if err != nil {
@@ -42,7 +43,7 @@ func DownstreamBandwidth(size uint64) Transport {
 						return n, err
 					}),
 					Closer: Closer(func() error {
-						return resp.Body.Close()
+						return body.Close()
 					}),
 				}
 			}
@@ -57,9 +58,10 @@ func UpstreamBandwidth(size uint64) Transport {
 	return func(next http.RoundTripper) http.RoundTripper {
 		return RoundTripper(func(req *http.Request) (*http.Response, error) {
 			if req.Body != nil {
+				body := req.Body
 				req.Body = ReadCloser{
 					Reader: Reader(func(bs []byte) (int, error) {
-						n, err := req.Body.Read(bs)
+						n, err := body.Read(bs)
 						if n > 0 {
 							err = limiter.WaitN(req.Context(), n)
 							if err != nil {
@@ -69,7 +71,7 @@ func UpstreamBandwidth(size uint64) Transport {
 						return n, err
 					}),
 					Closer: Closer(func() error {
-						return req.Body.Close()
+						return body.Close()
 					}),
 				}
 			}
